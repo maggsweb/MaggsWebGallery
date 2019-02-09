@@ -1,0 +1,21 @@
+ # .htaccess
+#---------------------------------------------------------
+RewriteEngine On
+RewriteBase /
+#---------------------------------------------------------
+# Prevent infinite loops on index.php
+RewriteRule ^index\.php$ - [L]
+#---------------------------------------------------------
+# Add trailing slash if missing
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.*[^/])$ /$1/ [L,R=301]
+#---------------------------------------------------------
+# Redirects to a real path
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+#RewriteRule . /learn/phpcourse/seo/index.php [L]
+RewriteRule . / [L]
+#---------------------------------------------------------
+
+
