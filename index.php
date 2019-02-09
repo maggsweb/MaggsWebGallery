@@ -11,7 +11,10 @@ $mtime = explode(" ",$mtime);
 $mtime = $mtime[1] + $mtime[0];
 $starttime = $mtime;
 
-include 'dumpr.php';
+if(file_exists('dumpr.php')){
+    include 'dumpr.php';
+}
+
 include 'functions.php';
 
 define('GALLERY_ROOT', 'photos');
