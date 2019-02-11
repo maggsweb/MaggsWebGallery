@@ -43,12 +43,12 @@ function getOrCreateThumbnail($imagepath){
  */
 function createThumbnail($imagepath,$thumbnailpath){
     include_once 'ImageResize.php';
-    $resizeObj = new ImageResize($imagepath);
-    $resizeObj->resizeImage(500, 500, 'auto'); //(options: exact, portrait, landscape, auto, crop)
-    $resizeObj->saveImage($thumbnailpath);
+    if(is_file($imagepath)){
+        $resizeObj = new ImageResize($imagepath);
+        $resizeObj->resizeImage(500, 500, 'auto'); //(options: exact, portrait, landscape, auto, crop)
+        $resizeObj->saveImage($thumbnailpath);
+    }
 }
-
-
 
 
 /**
@@ -86,8 +86,7 @@ function getCurrentDirectory(){
     if($segment){
         return "/$segment/";
     }
-    return '/';
-    
+    return false;
 }
 
 

@@ -29,9 +29,14 @@ $dirs = $files = false;
 $currentDir     = getCurrentDirectory(); 
 $currentDirName = getCurrentDirectoryName($currentDir); 
 
+//dumpr('spacer');
+//dumpr($currentDir);
+//dumpr($currentDirName);
+
 //============================================================================================================
 // DIRECTORIES
 $directories = scandir(GALLERY_ROOT);
+//dumpr($directories);
 if($directories){
     
     $dirs = array();
@@ -40,7 +45,7 @@ if($directories){
 
         if (is_dir(GALLERY_ROOT.'/'.$directory)) {
 
-            if ($directory != "." && $directory != "..") {
+            if (substr($directory,0,1) != ".") {
 
                 checkCreateDir(THUMBS_ROOT.'/'.$directory);
 
@@ -64,22 +69,29 @@ if($directories){
             }
         }
     }
-
 }
 //dumpr($dirs);
 
 //============================================================================================================
 // IMAGES
 $images = scandir(GALLERY_ROOT . $currentDir);
+//dumpr($images);
 if ($images) {
     
     $files = array();
     
     // Remove Non-Image files
     foreach($images as $k => $file){
-        if ($file == "." || $file == ".." || !preg_match("/.jpg$|.gif$|.png$/i", $file)) {
+        
+//        dumpr($file);
+        
+        if (substr($file,0,1) == ".") {
             unset($images[$k]);
         }
+        
+        //if ($file == "." || $file == ".." || !preg_match("/.jpg$|.gif$|.png$/i", strtolower($file))) {
+            //unset($images[$k]);
+        //}
     }
     
     // Build an array of Images, creating the thumbnail image if it doesn't exist
@@ -92,8 +104,8 @@ if ($images) {
             "order" => $k,
             "path"  => '/'.GALLERY_ROOT.$currentDir.$file,
             "thumb" => '/'.THUMBS_ROOT.$currentDir.$file,
-            "isize" => filesize(GALLERY_ROOT.$currentDir.$file),
-            "tsize" => filesize(THUMBS_ROOT.$currentDir.$file),
+          //  "isize" => filesize(GALLERY_ROOT.$currentDir.$file),
+          //  "tsize" => filesize(THUMBS_ROOT.$currentDir.$file),
         );
                
     }
@@ -148,7 +160,7 @@ if ($images) {
         
         <?php } else { ?> 
          
-        <div id="directory-nav"> 
+        <div id="directory-nav">
             <div class="container">
                 <div class="row">
                     <?php foreach($dirs as $dir){ //dumpr($dir); ?>
@@ -168,12 +180,10 @@ if ($images) {
          
         <?php } ?>
          
-         
+        <?php if($currentDirName){ ?>
         <div class="container">
             
-            <?php if($currentDirName){ ?>
             <h2><?=$currentDirName?> <span><?=count($files)?> images</span></h2>
-            <?php } ?>
         
             <?php /* Output an ordered list of hidden image links */ ?>
             <?php if(count($files)){ ?>
@@ -207,10 +217,13 @@ if ($images) {
                     </div>
                     <?php } ?>
                 </div>
+                
             </div>
             <?php } ?>
-
-     
+            
+        </div>
+        <?php } ?>
+         
         <?php
         //Debug stuff
         //-----------------------
@@ -220,8 +233,7 @@ if ($images) {
         $endtime = $mtime;
         $totaltime = ($endtime - $starttime);
         ?>
-            <p style="color:#fff">This page was created in <?=$totaltime?> seconds</p>
-        </div>
+        <p style="color:#fff">This page was created in <?=$totaltime?> seconds</p>
         
         <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
