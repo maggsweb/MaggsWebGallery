@@ -11,6 +11,8 @@ $mtime = explode(" ",$mtime);
 $mtime = $mtime[1] + $mtime[0];
 $starttime = $mtime;
 
+define('DEBUG',0);
+
 if(file_exists('dumpr.php')){
     include 'dumpr.php';
 }
@@ -35,38 +37,44 @@ $currentDirName = getCurrentDirectoryName($currentDir);
 
 //============================================================================================================
 // DIRECTORIES
-$directories = scandir(GALLERY_ROOT);
-//dumpr($directories);
-if($directories){
+$files = scandir(GALLERY_ROOT);
+//dumpr($files);
+if($files){
     
     $dirs = array();
 
-    foreach($directories as $directory){
+    foreach($files as $file){
 
-        if (is_dir(GALLERY_ROOT.'/'.$directory)) {
+        if($file == '.') continue;
+        if($file == '..') continue;
+        
+        // Rename files/folders
+        if( ! preg_match('/^[A-Za-z0-9_\-\.]+$/',$file)){
+            $newfile = preg_replace('/[^A-Za-z0-9_\-\.]+/','_',$file);
+            rename(GALLERY_ROOT.'/'.$file,GALLERY_ROOT.'/'.$newfile);
+        }
+        
+        if (is_dir(GALLERY_ROOT.'/'.$file)) {
 
-            if (substr($directory,0,1) != ".") {
+            checkCreateDir(THUMBS_ROOT.'/'.$file);
 
-                checkCreateDir(THUMBS_ROOT.'/'.$directory);
+            unset($firstimage);
 
-                unset($firstimage);
+            $firstimage = getfirstImage(GALLERY_ROOT.'/'.$file);
 
-                $firstimage = getfirstImage(GALLERY_ROOT.'/'.$directory);
+            $thumbnail = getOrCreateThumbnail(GALLERY_ROOT.'/'.$file.'/'.$firstimage);
 
-                $thumbnail = getOrCreateThumbnail(GALLERY_ROOT.'/'.$directory.'/'.$firstimage);
+            if ($thumbnail) {
 
-                if ($thumbnail) {
+                $dirs[] = array(
+                    "name" => $file,
+                    "path" => $file,
+                    //"imagepath" => "/" . GALLERY_ROOT.'/'.$file . "/" . $firstimage,
+                    "thumbpath" => "/" . THUMBS_ROOT.'/'.$file . "/" . $firstimage,
+                    "numimages" => count(glob(GALLERY_ROOT.'/'.$file.'/*.*'))
+                );
 
-                    $dirs[] = array(
-                        "name" => $directory,
-                        "path" => $directory,
-                        //"imagepath" => "/" . GALLERY_ROOT.'/'.$directory . "/" . $firstimage,
-                        "thumbpath" => "/" . THUMBS_ROOT.'/'.$directory . "/" . $firstimage,
-                        "numimages" => count(glob(GALLERY_ROOT.'/'.$directory.'/*.*'))
-                    );
-
-                } 
-            }
+            } 
         }
     }
 }
@@ -83,15 +91,20 @@ if ($images) {
     // Remove Non-Image files
     foreach($images as $k => $file){
         
-//        dumpr($file);
+//        if (substr($file,0,1) == ".") {
+//            unset($images[$k]);
+//            continue;
+//        }
         
-        if (substr($file,0,1) == ".") {
+        
+//        dumpr($file);
+//        dumpr(GALLERY_ROOT . $currentDir.$file);
+//        dumpr(is_image(GALLERY_ROOT . $currentDir.$file));
+//                
+        if(!is_image(GALLERY_ROOT . $currentDir.$file)){
             unset($images[$k]);
         }
-        
-        //if ($file == "." || $file == ".." || !preg_match("/.jpg$|.gif$|.png$/i", strtolower($file))) {
-            //unset($images[$k]);
-        //}
+   
     }
     
     // Build an array of Images, creating the thumbnail image if it doesn't exist
@@ -138,7 +151,7 @@ if ($images) {
             </div>
         </nav>
          
-        <?php if($currentDir){  ?>
+        <?php if($currentDir != '/'){  ?>
          
         <div id="mini-directory-nav">
             <div class="grey">
@@ -164,7 +177,7 @@ if ($images) {
             <div class="container">
                 <div class="row">
                     <?php foreach($dirs as $dir){ //dumpr($dir); ?>
-                    <div class="col-xs-12 col-sm-4 col-lg-2">
+                    <div class="col-xs-12 col-sm-4 col-lg-3">
                         <a href="/<?=$dir['path']?>/">
                             <div class="dirimage greyscale" style="background-image:url('<?=$dir['thumbpath']?>');">
                                 <h4><?=ucfirst($dir['name'])?></h4>
@@ -225,6 +238,9 @@ if ($images) {
         <?php } ?>
          
         <?php
+        
+        if(DEBUG){
+        
         //Debug stuff
         //-----------------------
         $mtime = microtime();
@@ -233,7 +249,16 @@ if ($images) {
         $endtime = $mtime;
         $totaltime = ($endtime - $starttime);
         ?>
-        <p style="color:#fff">This page was created in <?=$totaltime?> seconds</p>
+        <p>This page was created in <?=$totaltime?> seconds</p>
+        <p>Current directory [$currentDir]:: <?=$currentDir ?: 'N/A'?></p>
+        <p>Current directory name [$currentDirName]:: <?=$currentDirName?></p>
+        <p><?=count($files)?> scanned, <?=count($dirs)?> with images</p>
+        <?php dumpr($dirs,'$dirs'); ?>
+        <?php dumpr($images,'$images'); ?>
+        
+        
+        
+        <?php } ?>
         
         <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>

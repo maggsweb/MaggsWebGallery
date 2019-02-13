@@ -13,10 +13,10 @@ function checkCreateDir($path){
     if(!is_dir($path)){
         mkdir($path);
     }
-    if(!is_dir($path)){
-        header("Location: system_check.php");
-        exit;
-    }
+    //if(!is_dir($path)){
+    //    header("Location: system_check.php");
+    //    exit;
+    //}
 }
 
 
@@ -72,6 +72,21 @@ function getfirstImage($dirname) {
 }
 
 
+/**
+ * @CM
+ * 
+ * @param type $path
+ * @return boolean
+ */
+function is_image($path){
+    $exts = array("jpg", "png", "jpeg", "gif");
+    if(is_file($path)){
+        $ext = strtolower(pathinfo($path,PATHINFO_EXTENSION));
+        return in_array($ext,$exts);
+    }
+    return false;
+}
+
 
 /**
  * 
@@ -86,7 +101,7 @@ function getCurrentDirectory(){
     if($segment){
         return "/$segment/";
     }
-    return false;
+    return '/';
 }
 
 
@@ -103,9 +118,8 @@ function getCurrentDirectoryName($slug){
         $slug = ucfirst(strtolower($slug));
         return $slug;
     }
-    return false;
+    return 'HOME';
 }
-
 
 
 //
