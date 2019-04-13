@@ -31,14 +31,9 @@ $dirs = $files = false;
 $currentDir     = getCurrentDirectory(); 
 $currentDirName = getCurrentDirectoryName($currentDir); 
 
-//dumpr('spacer');
-//dumpr($currentDir);
-//dumpr($currentDirName);
-
 //============================================================================================================
 // DIRECTORIES
 $files = scandir(GALLERY_ROOT);
-//dumpr($files);
 if($files){
     
     $dirs = array();
@@ -48,7 +43,7 @@ if($files){
         if($file == '.') continue;
         if($file == '..') continue;
         
-        // Rename files/folders
+        // Rename files/folders and save
         if( ! preg_match('/^[A-Za-z0-9_\-\.]+$/',$file)){
             $newfile = preg_replace('/[^A-Za-z0-9_\-\.]+/','_',$file);
             rename(GALLERY_ROOT.'/'.$file,GALLERY_ROOT.'/'.$newfile);
@@ -60,17 +55,17 @@ if($files){
 
             unset($firstimage);
 
-            $firstimage = getfirstImage(GALLERY_ROOT.'/'.$file);
-
-            $thumbnail = getOrCreateThumbnail(GALLERY_ROOT.'/'.$file.'/'.$firstimage);
+            $image = getLastImage(GALLERY_ROOT.'/'.$file);
+            $thumbnail = getOrCreateThumbnail(GALLERY_ROOT.'/'.$file.'/'.$image);
+            $directoryName = buildNameFromDirectory($file);
 
             if ($thumbnail) {
 
                 $dirs[] = array(
-                    "name" => $file,
+                    "name" => $directoryName,
                     "path" => $file,
                     //"imagepath" => "/" . GALLERY_ROOT.'/'.$file . "/" . $firstimage,
-                    "thumbpath" => "/" . THUMBS_ROOT.'/'.$file . "/" . $firstimage,
+                    "thumbpath" => "/" . THUMBS_ROOT.'/'.$file . "/" . $image,
                     "numimages" => count(glob(GALLERY_ROOT.'/'.$file.'/*.*'))
                 );
 
@@ -78,33 +73,19 @@ if($files){
         }
     }
 }
-//dumpr($dirs);
 
 //============================================================================================================
 // IMAGES
 $images = scandir(GALLERY_ROOT . $currentDir);
-//dumpr($images);
 if ($images) {
     
     $files = array();
     
     // Remove Non-Image files
     foreach($images as $k => $file){
-        
-//        if (substr($file,0,1) == ".") {
-//            unset($images[$k]);
-//            continue;
-//        }
-        
-        
-//        dumpr($file);
-//        dumpr(GALLERY_ROOT . $currentDir.$file);
-//        dumpr(is_image(GALLERY_ROOT . $currentDir.$file));
-//                
         if(!is_image(GALLERY_ROOT . $currentDir.$file)){
             unset($images[$k]);
         }
-   
     }
     
     // Build an array of Images, creating the thumbnail image if it doesn't exist
@@ -117,13 +98,9 @@ if ($images) {
             "order" => $k,
             "path"  => '/'.GALLERY_ROOT.$currentDir.$file,
             "thumb" => '/'.THUMBS_ROOT.$currentDir.$file,
-          //  "isize" => filesize(GALLERY_ROOT.$currentDir.$file),
-          //  "tsize" => filesize(THUMBS_ROOT.$currentDir.$file),
         );
-               
     }
 } 
-//dumpr($files);
 
 //============================================================================================================
 ?>
@@ -180,7 +157,7 @@ if ($images) {
                     <div class="col-xs-12 col-sm-4 col-lg-3">
                         <a href="/<?=$dir['path']?>/">
                             <div class="dirimage greyscale" style="background-image:url('<?=$dir['thumbpath']?>');">
-                                <h4><?=ucfirst($dir['name'])?></h4>
+                                <h4><?=$dir['name']?></h4>
                                 <h5><?=$dir['numimages']?> images</h5>
                             </div>
                         </a>

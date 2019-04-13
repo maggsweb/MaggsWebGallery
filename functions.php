@@ -57,18 +57,19 @@ function createThumbnail($imagepath,$thumbnailpath){
  * @param type $dirname
  * @return boolean
  */
-function getfirstImage($dirname) {
+function getLastImage($dirname) {
     $exts = array("jpg", "png", "jpeg", "gif");
     $images = scandir($dirname);
+    $lastImage = false;
     foreach($images as $image){
         if(is_file($dirname.'/'.$image)){
             $ext = strtolower(pathinfo($dirname.'/'.$image,PATHINFO_EXTENSION));
             if(in_array($ext,$exts)){
-                return $image;
+                $lastImage = $image;
             }
         }
     }
-    return false;
+    return $lastImage;
 }
 
 
@@ -115,11 +116,25 @@ function getCurrentDirectoryName($slug){
     $slug = str_replace('/','',$slug);
     if($slug){
         $slug = str_replace('_',' ',$slug);
-        $slug = ucfirst(strtolower($slug));
+        $slug = ucwords(strtolower($slug));
         return $slug;
     }
     return 'HOME';
 }
+
+
+/**
+ * @CM
+ * @param $file
+ * @return mixed|string
+ */
+function buildNameFromDirectory($file){
+    $name = str_replace(array('_','-'),' ',$file);
+    $name = ucwords($name);
+    return $name;
+}
+
+
 
 
 //
