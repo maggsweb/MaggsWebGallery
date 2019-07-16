@@ -1,0 +1,3 @@
+Move directory processing to a Class/Function
+Move image    -- " --
+Move styles.css out from /styles
