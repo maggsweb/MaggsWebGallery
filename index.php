@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 ini_set("memory_limit", "512M");
 
-define('DEBUG',0);
+define('DEBUG',1);
 
 if(DEBUG) {
     $mtime = microtime();
@@ -36,28 +36,27 @@ $files = scanImages($currentDir);
 ?>
 <!doctype html>
 <html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Gallery</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css"/>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link href="/styles.css" rel="stylesheet" type="text/css"/>
-</head>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Gallery</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css"/>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
+        <link href="/styles.css" rel="stylesheet" type="text/css"/>
+    </head>
 <body>
 
-<!-- Fixed navbar -->
-<nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div id="logo">
-            <a href="/" title="MaggsWeb">
-                <div id="logoLeft">MaggsWeb</div>
-                <div id="logoRight">Gallery</div> <!-- OPTIONAL -->
-            </a>
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div id="logo">
+                <a href="/" title="MaggsWeb">
+                    <div id="logoLeft">MaggsWeb</div>
+                    <div id="logoRight">Gallery</div> <!-- OPTIONAL -->
+                </a>
+            </div>
         </div>
-    </div>
-</nav>
+    </nav>
 
 <?php /* ---------------------------------------------------------------------------------------- */ ?>
 
@@ -66,16 +65,16 @@ $files = scanImages($currentDir);
     <div id="directory-nav">
         <div class="container">
             <div class="row">
-                <?php foreach ($dirs as $dir) { //dumpr($dir); ?>
-                    <div class="col-xs-12 col-sm-4 col-lg-3">
-                        <a href="/<?= $dir['path'] ?>/">
-                            <div class="dirimage greyscale" style="background-image:url('<?= $dir['thumbpath'] ?>');">
-                                <h4><?= $dir['name'] ?></h4>
-                                <h5><?= $dir['numimages'] ?> image<?=$dir['numimages']==1?'':'s'?></h5>
-                            </div>
-                        </a>
-                    </div>
-                <?php } ?>
+<?php foreach ($dirs as $dir) { //dumpr($dir); ?>
+                <div class="col-xs-12 col-sm-4 col-lg-3">
+                    <a href="/<?= $dir['path'] ?>/">
+                        <div class="dirimage greyscale" style="background-image:url('<?= $dir['thumbpath'] ?>');">
+                            <h4><?= $dir['name'] ?></h4>
+                            <h5><?= $dir['numimages'] ?> image<?=$dir['numimages']==1?'':'s'?></h5>
+                        </div>
+                    </a>
+                </div>
+<?php } ?>
                 <div class="clearfix"></div>
             </div>
         </div>
@@ -87,15 +86,14 @@ $files = scanImages($currentDir);
         <div class="grey">
             <div class="container">
                 <div class="scroll">
-                    <?php foreach ($dirs as $dir) { //dumpr($dir); dumpr($currentDir); ?>
-                        <?php $class = $currentDir == "/{$dir['path']}/" ? 'selected' : ''; ?>
-                        <div class="minidirectory">
-                            <!--<h4><?= ucfirst($dir['name']) ?></h4>-->
-                            <a href="/<?= $dir['path'] ?>/">
-                                <div class="minidirimage greyscale <?= $class ?>" style="background-image:url('<?= $dir['thumbpath'] ?>');"></div>
-                            </a>
-                        </div>
-                    <?php } ?>
+<?php foreach ($dirs as $dir) { //dumpr($dir); dumpr($currentDir); ?>
+                    <div class="minidirectory">
+                        <!--<h4><?= ucfirst($dir['name']) ?></h4>-->
+                        <a href="/<?= $dir['path'] ?>/">
+                            <div class="minidirimage greyscale <?= $currentDir == "/{$dir['path']}/" ? 'selected' : ''; ?>" style="background-image:url('<?= $dir['thumbpath'] ?>');"></div>
+                        </a>
+                    </div>
+<?php } ?>
                 </div>
             </div>
         </div>
@@ -106,47 +104,41 @@ $files = scanImages($currentDir);
 
 <?php /* ---------------------------------------------------------------------------------------- */ ?>
 
-<?php if ($currentDirName) { ?>
+<?php if (count($files)) { ?>
     <div class="container">
 
         <h2><?= $currentDirName ?> <span><?= count($files) ?> image<?=count($files)==1?'':'s'?></span></h2>
 
-        <?php /* Output an ordered list of hidden image links */ ?>
-        <?php if (count($files)) { ?>
-            <?php foreach ($files as $image) { ?>
-                <a data-fancybox="gallery" href="<?= $image['path'] ?>" id="image<?= $image['order'] ?>"></a>
-            <?php } ?>
-        <?php } ?>
+<?php /* Output an ordered list of hidden image links */ ?>
+<?php foreach ($files as $image) { ?>
+        <a data-fancybox="gallery" href="<?= $image['path'] ?>" id="image<?= $image['order'] ?>"></a>
+<?php } ?>
 
-        <?php /* Output a `columned` list of images */ ?>
-        <?php if (count($files)) { ?>
-            <div id="images">
-                <div class="row">
-                    <?php
-                    $cols = 4;
-                    $col = 1;
-                    $imageColumns = array();
-                    $i = 1;
-                    foreach ($files as $file) {
-                        $imageColumns[$col][$i] = $file;
-                        $col++;
-                        $i++;
-                        $col = $col > 4 ? 1 : $col;
-                    }
-                    foreach ($imageColumns as $column => $imageArray) { ?>
-                        <div class="col-xs-4 col-md-3">
-                            <?php foreach ($imageArray as $image) { ?>
-                                <div class="image" data-trigger="<?= $image['order'] ?>">
-                                    <img src="<?= $image['thumb'] ?>"/>
-                                </div>
-                            <?php } ?>
-                        </div>
-                    <?php } ?>
+<?php /* Output a `columned` list of images */ ?>
+        <div id="images">
+            <div class="row">
+<?php
+                $cols = 4;
+                $col = 1;
+                $imageColumns = array();
+                $i = 1;
+                foreach ($files as $file) {
+                    $imageColumns[$col][$i] = $file;
+                    $col++;
+                    $i++;
+                    $col = $col > 4 ? 1 : $col;
+                }
+                foreach ($imageColumns as $column => $imageArray) { ?>
+                <div class="col-xs-4 col-md-3">
+<?php foreach ($imageArray as $image) { ?>
+                    <div class="image" data-trigger="<?= $image['order'] ?>">
+                        <img src="<?= $image['thumb'] ?>"/>
+                    </div>
+<?php } ?>
                 </div>
-
+<?php } ?>
             </div>
-        <?php } ?>
-
+        </div>
     </div>
 <?php } ?>
 
@@ -159,9 +151,8 @@ $files = scanImages($currentDir);
     $totaltime = ($endtime - $starttime);
     ?>
     <p>This page was created in <?= $totaltime ?> seconds</p>
-    <p>Current directory [$currentDir]:: <?= $currentDir ?: 'N/A' ?></p>
-    <p>Current directory name [$currentDirName]:: <?= $currentDirName ?></p>
-    <p><?= count($files) ?> scanned, <?= count($dirs) ?> with images</p>
+    <?php dumpr($currentDir, '$currentDir'); ?>
+    <?php dumpr($currentDirName, '$currentDirName'); ?>
     <?php dumpr($dirs, '$dirs'); ?>
     <?php dumpr($files, '$files'); ?>
 <?php } ?>
