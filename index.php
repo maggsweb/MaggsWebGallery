@@ -5,7 +5,7 @@ error_reporting(E_ALL);
 
 ini_set("memory_limit", "512M");
 
-define('DEBUG',1);
+define('DEBUG',0);
 
 if(DEBUG) {
     $mtime = microtime();
