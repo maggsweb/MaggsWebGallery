@@ -6,8 +6,102 @@
 
 /**
  * @CM
+ *
+ * @return array
+ */
+function scanDirectories()
+{
+
+    $dirs = array();
+
+    // DIRECTORIES
+    $files = scandir(GALLERY_ROOT);
+    if ($files) {
+
+        foreach ($files as $file) {
+
+            if ($file == '.') continue;
+            if ($file == '..') continue;
+
+            // Rename files/folders and save
+            if (!preg_match('/^[A-Za-z0-9_\-\.]+$/', $file)) {
+                $newfile = preg_replace('/[^A-Za-z0-9_\-\.]+/', '_', $file);
+                rename(GALLERY_ROOT . '/' . $file, GALLERY_ROOT . '/' . $newfile);
+            }
+
+            if (is_dir(GALLERY_ROOT . '/' . $file)) {
+
+                checkCreateDir(THUMBS_ROOT . '/' . $file);
+
+                unset($firstimage);
+
+                $image = getLastImage(GALLERY_ROOT . '/' . $file);
+                $thumbnail = getOrCreateThumbnail(GALLERY_ROOT . '/' . $file . '/' . $image);
+                $directoryName = buildNameFromDirectory($file);
+
+                if ($thumbnail) {
+
+                    $dirs[] = array(
+                        "name" => $directoryName,
+                        "path" => $file,
+                        "thumbpath" => "/" . THUMBS_ROOT . '/' . $file . "/" . $image,
+                        "numimages" => count(glob(GALLERY_ROOT . '/' . $file . '/*.*'))
+                    );
+
+                }
+            }
+        }
+    }
+    return $dirs;
+}
+
+
+/**
+ * @CM
+ *
+ * @param $currentDir
+ * @return array
+ */
+function scanImages($currentDir)
+{
+
+    $files = array();
+
+    if($currentDir) {
+
+        $images = scandir(GALLERY_ROOT . $currentDir);
+        if ($images) {
+
+            // Remove Non-Image files
+            foreach ($images as $k => $file) {
+                if (!is_image(GALLERY_ROOT . $currentDir . $file)) {
+                    unset($images[$k]);
+                }
+            }
+
+            // Build an array of Images, creating the thumbnail image if it doesn't exist
+            foreach ($images as $k => $file) {
+
+                getOrCreateThumbnail(GALLERY_ROOT . $currentDir . $file);
+
+                $files[] = array(
+                    "name" => $file,
+                    "order" => $k,
+                    "path" => '/' . GALLERY_ROOT . $currentDir . $file,
+                    "thumb" => '/' . THUMBS_ROOT . $currentDir . $file,
+                );
+            }
+        }
+    }
+    return $files;
+}
+
+
+
+/**
+ * @CM
  * 
- * @param type $path
+ * @param string $path
  */
 function checkCreateDir($path){
     if(!is_dir($path)){
@@ -23,8 +117,8 @@ function checkCreateDir($path){
 /**
  * @CM
  * 
- * @param type $imagepath
- * @return type
+ * @param string $imagepath
+ * @return string|void
  */
 function getOrCreateThumbnail($imagepath){
     $thumbnailpath = str_replace(GALLERY_ROOT,THUMBS_ROOT,$imagepath);
@@ -38,8 +132,8 @@ function getOrCreateThumbnail($imagepath){
 /**
  * @CM
  * 
- * @param type $imagepath
- * @param type $thumbnailpath
+ * @param string $imagepath
+ * @param string $thumbnailpath
  */
 function createThumbnail($imagepath,$thumbnailpath){
     include_once 'ImageResize.php';
@@ -54,7 +148,7 @@ function createThumbnail($imagepath,$thumbnailpath){
 /**
  * @CM
  * 
- * @param type $dirname
+ * @param string $dirname
  * @return boolean
  */
 function getLastImage($dirname) {
@@ -76,7 +170,7 @@ function getLastImage($dirname) {
 /**
  * @CM
  * 
- * @param type $path
+ * @param string $path
  * @return boolean
  */
 function is_image($path){
@@ -113,13 +207,16 @@ function getCurrentDirectory(){
  * @return boolean
  */
 function getCurrentDirectoryName($slug){
+
+    if($slug=='/') return 'HOME';
+
     $slug = str_replace('/','',$slug);
     if($slug){
         $slug = str_replace('_',' ',$slug);
         $slug = ucwords(strtolower($slug));
         return $slug;
     }
-    return 'HOME';
+    return false;
 }
 
 
