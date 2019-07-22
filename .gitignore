@@ -1,8 +1,22 @@
-/photos.*/
+
 /dumpr.php
-/index.combinedroute.php
-/index.original.php
+
 /todo.txt
-/test.php
+
 /system_check.php
+
+
+
+
+# Ignore main images directory
+/photos
+/photos/*
+!/photos/.gitignore
+
+# Ignore main thumbnail directory
+/_thumbs
+/_thumbs/*
+!/_thumbs/.gitignore
+
+# PHPStorm
 /.idea

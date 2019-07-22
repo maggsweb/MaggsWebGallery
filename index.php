@@ -13,7 +13,7 @@ $starttime = $mtime;
 
 define('DEBUG',0);
 
-if(file_exists('dumpr.php')){
+if(defined('DEBUG') && DEBUG && file_exists('dumpr.php')){
     include 'dumpr.php';
 }
 
@@ -112,7 +112,7 @@ if ($images) {
         <title>Gallery</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">        
-        <link href="/css/styles.css" rel="stylesheet" type="text/css"/>
+        <link href="/styles.css" rel="stylesheet" type="text/css"/>
     </head>        
     <body>
         
