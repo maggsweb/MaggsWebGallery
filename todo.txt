@@ -1,8 +1,14 @@
-Move directory processing to a Class/Function
-Move image    -- " --
-Move styles.css out from /styles
-Resize main images larger than 1024??
+
+In Progress
+-----------
+
+
+To Do
+-----
 
 Add rotate function
 Add exif data function
 Add footer
+
+Sub Directories...  ???
+

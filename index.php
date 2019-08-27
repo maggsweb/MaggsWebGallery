@@ -1,36 +1,65 @@
 <?php
 
-error_reporting(E_ALL);
-//error_reporting(0);
+// CONFIGURABLE OPTIONS ======================================================================================
 
-ini_set("memory_limit", "512M");
+$debug = 1;
 
-define('DEBUG',0);
+/**
+ *
+ */
+$HTMLtitle = 'Gallery';
+
+/**
+ * Top Level Directory that store images
+ * -------------------------------------
+ * The directory name will be used for ordering and title
+ */
+$rootImageDirectory = 'photos';
+
+/**
+ * Top Level Directory for automated thumbnail creation
+ * ----------------------------------------------------
+ * This directory can be deleted, and it will regenerate on demand
+ */
+$rootThumbnailDirectory = '_thumbs';
+
+/**
+ * Maximum Image Size Width
+ * ------------------------
+ * Original images over this size width will be resized to this width
+ */
+$maxImageSizeWidth = 2000;
+
+
+//============================================================================================================
+
+error_reporting($debug);
+
+ini_set("memory_limit", "-1");
+
+define('DEBUG',$debug);
+define('GALLERY_ROOT', $rootImageDirectory);
+define('THUMBS_ROOT', $rootThumbnailDirectory);
+
+include 'functions.php';
+if(DEBUG) include 'dump.php';
+
+checkCreateDir(GALLERY_ROOT);
+checkCreateDir(THUMBS_ROOT);
 
 if(DEBUG) {
     $mtime = microtime();
     $mtime = explode(" ", $mtime);
     $mtime = $mtime[1] + $mtime[0];
     $starttime = $mtime;
-
-    if (file_exists('dumpr.php'))
-        include 'dumpr.php';
 }
-
-include 'functions.php';
-
-define('GALLERY_ROOT', 'photos');
-define('THUMBS_ROOT', '_thumbs');
-
-checkCreateDir(GALLERY_ROOT);
-checkCreateDir(THUMBS_ROOT);
 
 //============================================================================================================
 $currentDir = getCurrentDirectory();
 $currentDirName = getCurrentDirectoryName($currentDir);
 
 $dirs = scanDirectories();
-$files = scanImages($currentDir);
+$files = scanImages($currentDir,$maxImageSizeWidth);
 
 //============================================================================================================
 ?>
@@ -39,10 +68,10 @@ $files = scanImages($currentDir);
     <head>
         <meta charset="utf-8"/>
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Gallery</title>
+        <title><?=$HTMLtitle?></title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.css"/>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
-        <link href="/styles.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="/styles.css" type="text/css"/>
     </head>
 <body>
 
@@ -52,7 +81,7 @@ $files = scanImages($currentDir);
             <div id="logo">
                 <a href="/" title="MaggsWeb">
                     <div id="logoLeft">MaggsWeb</div>
-                    <div id="logoRight">Gallery</div> <!-- OPTIONAL -->
+                    <div id="logoRight"><?=$HTMLtitle?></div>
                 </a>
             </div>
         </div>
@@ -86,19 +115,18 @@ $files = scanImages($currentDir);
         <div class="grey">
             <div class="container">
                 <div class="scroll">
-<?php foreach ($dirs as $dir) { //dumpr($dir); dumpr($currentDir); ?>
+<?php foreach ($dirs as $dir) { //dump($dir); //dump($currentDir); ?>
                     <div class="minidirectory">
-                        <!--<h4><?= ucfirst($dir['name']) ?></h4>-->
                         <a href="/<?= $dir['path'] ?>/">
-                            <div class="minidirimage greyscale <?= $currentDir == "/{$dir['path']}/" ? 'selected' : ''; ?>" style="background-image:url('<?= $dir['thumbpath'] ?>');"></div>
+                            <div class="minidirimage greyscale <?= $currentDir == "/{$dir['path']}/" ? 'selected' : ''; ?>" style="background-image:url('<?= $dir['thumbpath'] ?>');" data-title="<?= $dir['name'] ?>"></div>
                         </a>
                     </div>
 <?php } ?>
+                    <div class="minidirectory" id="currentdirname" data-current="<?= $currentDirName ?>"><?= $currentDirName ?></div>
                 </div>
             </div>
         </div>
     </div>
-
 
 <?php } ?>
 
@@ -142,48 +170,31 @@ $files = scanImages($currentDir);
     </div>
 <?php } ?>
 
+    <div id="footer">
+        <?php $gitBranch = getGitBranch(); ?>
+        &copy; <?=$HTMLtitle?> <?=date('Y')?> <span class="right">[GIT: <?=$gitBranch['branch']?> - <?=date('jS F Y',$gitBranch['date'])?>]</span>
+    </div>
+
 <?php if (DEBUG) {    //Debug stuff
     //-----------------------
     $mtime = microtime();
     $mtime = explode(" ", $mtime);
-    $mtime = $mtime[1] + $mtime[0];
-    $endtime = $mtime;
+    $endtime = $mtime[1] + $mtime[0];
     $totaltime = ($endtime - $starttime);
     ?>
-    <p>This page was created in <?= $totaltime ?> seconds</p>
-    <?php dumpr($currentDir, '$currentDir'); ?>
-    <?php dumpr($currentDirName, '$currentDirName'); ?>
-    <?php dumpr($dirs, '$dirs'); ?>
-    <?php dumpr($files, '$files'); ?>
+    <div id="debug">
+        <p>This page was created in <?= $totaltime ?> seconds</p>
+        <?php dump($currentDir, '$currentDir'); ?>
+        <?php dump($currentDirName, '$currentDirName'); ?>
+        <?php dump($dirs, '$dirs'); ?>
+        <?php dump($files, '$files'); ?>
+    </div>
 <?php } ?>
 
 <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
-<script>
-
-    jQuery(document).ready(function () {
-
-//            $(window).scroll(function() {
-//                if ($(this).scrollTop()>50) {
-//                    $('#mini-directory-nav').fadeIn();
-//                    $('#directory-nav').fadeOut();
-//                } else {
-//                  $('#mini-directory-nav').fadeOut();
-//                  $('#directory-nav').fadeIn();
-//                }
-//            });
-
-        $('.image').on('click', function () {
-            $image = $(this).attr('data-trigger');
-            $('#image' + $image).trigger('click');
-        });
-
-    });
-
-</script>
+<script src="/javascript.js" type="text/javascript"></script>
 
 </body>
 

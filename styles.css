@@ -1,9 +1,12 @@
 
+body {
+    /* Make space for #footer */
+    margin-bottom: 100px;
+}
 
 div {
     /*border: 1px dotted #ccc;*/
 }
- 
 
 h2 {
     color: #666;
@@ -45,7 +48,27 @@ a:hover {
 
 .minidirectory {
     display: inline-block;
-    padding: 10px 5px;
+    padding: 5px;
+    margin:0;
+}
+
+.minidirimage {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 50px;
+    height:50px;
+    background-size: cover;
+    background-position: 50% 0%; /* Left Top */
+}
+.minidirimage:hover {
+    border: 1px solid #298cad;
+}
+
+#currentdirname{
+    color: #cccccc;
+    float:right;
+    font-size: 2.5em;
+    font-style: italic;
 }
 
 .dirimage {
@@ -79,14 +102,6 @@ a:hover {
 }
 
 
-.minidirimage {
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 50px;
-    height:50px;
-    background-size: cover; 
-    background-position: 50% 0%; /* Left Top */ 
-}
 
 .greyscale {
     -webkit-filter: grayscale(75%); /* Safari 6.0 - 9.0 */
@@ -96,7 +111,7 @@ a:hover {
 
 .greyscale.selected,
 .greyscale:hover {
-    -webkit-filter: none();
+    -webkit-filter: none;
     filter: none;
 }
 
@@ -121,6 +136,28 @@ a:hover {
 
 
 
+#footer {
+    position:fixed;
+    width: 100%;
+    background-color: #DDD;
+    color: #666;
+    font-size: 12px;
+    padding: 10px 5px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin-bottom: 0;
+    border-top: 4px solid #4DACCC;
+}
+
+.right {
+    float:right;
+}
+.left {
+    float: left;
+}
+
+
 /** 
     ---------------------------------------------
     -- MAGGSWEB LOGO ---------------------------- 
@@ -141,7 +178,7 @@ a:hover {
 }
 
 #logo a {
-    font: Verdana, sans-serif;
+    font: 'Verdana', 'sans-serif';
     font-size: 18px;
     line-height: 32px;
     color: #FFFFFF;
@@ -171,13 +208,13 @@ a:hover {
     position:absolute;
     top:0px;
     left: 120px;
-    width: 70px;
+    /*width: 70px;*/
     height: 36px;
     border: 1px solid #ccc;
     border-left: none;
     -webkit-border-radius: 0 7px 7px 0;
     border-radius: 0 7px 7px 0;
-    padding-left: 6px;
+    padding: 0 6px;
     background: rgb(77,172,204);
     background: -moz-linear-gradient(top,  rgba(77,172,204,1) 0%, rgba(41,140,173,1) 62%);
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(77,172,204,1)), color-stop(62%,rgba(41,140,173,1)));
