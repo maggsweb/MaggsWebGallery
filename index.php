@@ -2,7 +2,7 @@
 
 // CONFIGURABLE OPTIONS ======================================================================================
 
-$debug = 1;
+$debug = (bool)preg_match("/.local/", $_SERVER['SERVER_NAME']);
 
 /**
  *
@@ -47,12 +47,10 @@ if(DEBUG) include 'dump.php';
 checkCreateDir(GALLERY_ROOT);
 checkCreateDir(THUMBS_ROOT);
 
-if(DEBUG) {
-    $mtime = microtime();
-    $mtime = explode(" ", $mtime);
-    $mtime = $mtime[1] + $mtime[0];
-    $starttime = $mtime;
-}
+$mtime = microtime();
+$mtime = explode(" ", $mtime);
+$mtime = $mtime[1] + $mtime[0];
+$starttime = $mtime;
 
 //============================================================================================================
 $currentDir = getCurrentDirectory();
@@ -175,21 +173,23 @@ $files = scanImages($currentDir,$maxImageSizeWidth);
         &copy; <?=$HTMLtitle?> <?=date('Y')?> <span class="right">[GIT: <?=$gitBranch['branch']?> - <?=date('jS F Y',$gitBranch['date'])?>]</span>
     </div>
 
-<?php if (DEBUG) {    //Debug stuff
-    //-----------------------
+
+<?php
     $mtime = microtime();
     $mtime = explode(" ", $mtime);
     $endtime = $mtime[1] + $mtime[0];
     $totaltime = ($endtime - $starttime);
-    ?>
-    <div id="debug">
-        <p>This page was created in <?= $totaltime ?> seconds</p>
-        <?php dump($currentDir, '$currentDir'); ?>
-        <?php dump($currentDirName, '$currentDirName'); ?>
-        <?php dump($dirs, '$dirs'); ?>
-        <?php dump($files, '$files'); ?>
-    </div>
-<?php } ?>
+?>
+<div id="debug">
+    <p>This page was created in <?= $totaltime ?> seconds</p>
+    <?php if (DEBUG) {    //Debug stuff
+        dump($currentDir, '$currentDir');
+        dump($currentDirName, '$currentDirName');
+        dump($dirs, '$dirs');
+        dump($files, '$files');
+    } ?>
+</div>
+
 
 <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
