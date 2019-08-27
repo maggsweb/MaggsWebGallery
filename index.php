@@ -168,33 +168,34 @@ $files = scanImages($currentDir,$maxImageSizeWidth);
     </div>
 <?php } ?>
 
-    <div id="footer">
-        <?php $gitBranch = getGitBranch(); ?>
-        &copy; <?=$HTMLtitle?> <?=date('Y')?> <span class="right">[GIT: <?=$gitBranch['branch']?> - <?=date('jS F Y',$gitBranch['date'])?>]</span>
-    </div>
 
-
-<?php
+    <?php
     $mtime = microtime();
     $mtime = explode(" ", $mtime);
     $endtime = $mtime[1] + $mtime[0];
     $totaltime = ($endtime - $starttime);
-?>
-<div id="debug">
-    <p>This page was created in <?= $totaltime ?> seconds</p>
-    <?php if (DEBUG) {    //Debug stuff
-        dump($currentDir, '$currentDir');
-        dump($currentDirName, '$currentDirName');
-        dump($dirs, '$dirs');
-        dump($files, '$files');
-    } ?>
-</div>
+    ?>
 
+    <div id="footer">
+        <?php $gitBranch = getGitBranch(); ?>
+        &copy; <?=$HTMLtitle?> <?=date('Y')?>
+        Page created in <?= $totaltime ?> seconds
+        <span class="right">[GIT: <?=$gitBranch['branch']?> - <?=date('jS F Y',$gitBranch['date'])?>]</span>
+    </div>
 
-<script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
-<script src="/javascript.js" type="text/javascript"></script>
+    <div id="debug">
+        <?php if (DEBUG) {    //Debug stuff
+            dump($currentDir, '$currentDir');
+            dump($currentDirName, '$currentDirName');
+            dump($dirs, '$dirs');
+            dump($files, '$files');
+        } ?>
+    </div>
+
+    <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.2/dist/jquery.fancybox.min.js"></script>
+    <script src="/javascript.js" type="text/javascript"></script>
 
 </body>
 
