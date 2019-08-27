@@ -173,13 +173,13 @@ $files = scanImages($currentDir,$maxImageSizeWidth);
     $mtime = microtime();
     $mtime = explode(" ", $mtime);
     $endtime = $mtime[1] + $mtime[0];
-    $totaltime = ($endtime - $starttime);
+    $totaltime = round(($endtime - $starttime),3);
     ?>
 
     <div id="footer">
         <?php $gitBranch = getGitBranch(); ?>
         &copy; <?=$HTMLtitle?> <?=date('Y')?>
-        Page created in <?= $totaltime ?> seconds
+         - Page created in <?= $totaltime ?> seconds
         <span class="right">[GIT: <?=$gitBranch['branch']?> - <?=date('jS F Y',$gitBranch['date'])?>]</span>
     </div>
 
