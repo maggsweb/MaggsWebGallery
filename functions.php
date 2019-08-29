@@ -236,21 +236,6 @@ function buildNameFromDirectory($file){
     return $name;
 }
 
-/**
- * @return array
- */
-function getGitBranch()
-{
-    $gitBasePath = $_SERVER['DOCUMENT_ROOT'].'/.git'; // e.g in laravel: base_path().'/.git';
-    $gitStr = file_get_contents($gitBasePath.'/HEAD');
-    $gitBranch = $gitStr    ? rtrim(preg_replace("/(.*?\/){2}/", '', $gitStr)) : '';
-    $gitDate   = $gitBranch ? filemtime($gitBasePath.'/refs/heads/'.$gitBranch) : '';
-    return [
-        'branch' => ucfirst($gitBranch),
-        'date' => $gitDate,
-    ];
-}
-
 //
 //// Rotate JPG pictures
 //if (preg_match("/.jpg$|.jpeg$/i", $_GET['filename'])) {
