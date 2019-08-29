@@ -1,4 +1,4 @@
- # .htaccess
+# .htaccess
 #---------------------------------------------------------
 RewriteEngine On
 RewriteBase /

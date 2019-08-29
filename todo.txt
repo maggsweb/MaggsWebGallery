@@ -8,7 +8,8 @@ To Do
 
 Add rotate function
 Add exif data function
-Add footer
+
 
 Sub Directories...  ???
 
+Add a way of securing it?

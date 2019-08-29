@@ -5,16 +5,19 @@
 
 
 /**
- *
- * @return array
+ * @param $GALLERY_ROOT
+ * @param $THUMBS_ROOT
+ * @return array|bool
  */
-function scanDirectories()
+function scanDirectories($GALLERY_ROOT, $THUMBS_ROOT)
 {
+    //Bomb out if GALLERY_ROOT not set
+    if(!$GALLERY_ROOT) return false;
 
     $dirs = array();
 
     // DIRECTORIES
-    $files = scandir(GALLERY_ROOT);
+    $files = scandir($GALLERY_ROOT);
     if ($files) {
 
         foreach ($files as $file) {
@@ -25,17 +28,17 @@ function scanDirectories()
             // Rename files/folders and save
             if (!preg_match('/^[A-Za-z0-9_\-\.]+$/', $file)) {
                 $newfile = preg_replace('/[^A-Za-z0-9_\-\.]+/', '_', $file);
-                rename(GALLERY_ROOT . '/' . $file, GALLERY_ROOT . '/' . $newfile);
+                rename($GALLERY_ROOT . '/' . $file, $GALLERY_ROOT . '/' . $newfile);
             }
 
-            if (is_dir(GALLERY_ROOT . '/' . $file)) {
+            if (is_dir($GALLERY_ROOT . '/' . $file)) {
 
-                checkCreateDir(THUMBS_ROOT . '/' . $file);
+                checkCreateDir($THUMBS_ROOT . '/' . $file);
 
                 unset($firstimage);
 
-                $image = getLastImage(GALLERY_ROOT . '/' . $file);
-                $thumbnail = getOrCreateThumbnail(GALLERY_ROOT . '/' . $file . '/' . $image);
+                $image = getLastImage($GALLERY_ROOT . '/' . $file);
+                $thumbnail = getOrCreateThumbnail($GALLERY_ROOT . '/' . $file . '/' . $image, $GALLERY_ROOT, $THUMBS_ROOT);
                 $directoryName = buildNameFromDirectory($file);
 
                 if ($thumbnail) {
@@ -43,8 +46,8 @@ function scanDirectories()
                     $dirs[] = array(
                         "name" => $directoryName,
                         "path" => $file,
-                        "thumbpath" => "/" . THUMBS_ROOT . '/' . $file . "/" . $image,
-                        "numimages" => count(glob(GALLERY_ROOT . '/' . $file . '/*.*'))
+                        "thumbpath" => "/" . $THUMBS_ROOT . '/' . $file . "/" . $image,
+                        "numimages" => count(glob($GALLERY_ROOT . '/' . $file . '/*.*'))
                     );
 
                 }
@@ -56,47 +59,52 @@ function scanDirectories()
 
 /**
  * @param $currentDir
- * @param $maxImageSizeWidth
- * @return array
+ * @param $MAX_IMAGE_SIZE
+ * @param $GALLERY_ROOT
+ * @param $THUMBS_ROOT
+ * @return array|bool
  */
-function scanImages($currentDir, $maxImageSizeWidth)
+function scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $MAX_IMAGE_SIZE)
 {
+    //Bomb out if GALLERY_ROOT not set
+    if (!$GALLERY_ROOT) return false;
 
     $files = array();
 
     if($currentDir) {
 
-        $images = scandir(GALLERY_ROOT . $currentDir);
+        $images = scandir($GALLERY_ROOT . $currentDir);
         if ($images) {
 
             // Process Images
             foreach ($images as $k => $file) {
 
-                $fullpath = GALLERY_ROOT . $currentDir . $file;
+                $fullpath = $GALLERY_ROOT . $currentDir . $file;
 
                 // Remove Non-Image files
                 if (!is_image($fullpath)) {
                     unset($images[$k]);
                 }
 
-                // Resize Images > 2000px wide
-                $s = getimagesize($fullpath);
-                if($s[0] > $maxImageSizeWidth){  // Width > 2000px
-                    resizeOriginalImage($fullpath);
+                // Resize images if set
+                if($RESIZE_IMAGES && is_image($fullpath)) {
+                    $s = getimagesize($fullpath);
+                    if ($s[0] > $MAX_IMAGE_SIZE) {  // Width > 2000px
+                        resizeOriginalImage($fullpath);
+                    }
                 }
-
             }
 
             // Build an array of Images, creating the thumbnail image if it doesn't exist
             foreach ($images as $k => $file) {
 
-                getOrCreateThumbnail(GALLERY_ROOT . $currentDir . $file);
+                getOrCreateThumbnail($GALLERY_ROOT . $currentDir . $file, $GALLERY_ROOT, $THUMBS_ROOT);
 
                 $files[] = array(
                     "name" => $file,
                     "order" => $k,
-                    "path" => '/' . GALLERY_ROOT . $currentDir . $file,
-                    "thumb" => '/' . THUMBS_ROOT . $currentDir . $file,
+                    "path" => '/' . $GALLERY_ROOT . $currentDir . $file,
+                    "thumb" => '/' . $THUMBS_ROOT . $currentDir . $file,
                 );
             }
         }
@@ -109,21 +117,21 @@ function scanImages($currentDir, $maxImageSizeWidth)
  * @param string $path
  */
 function checkCreateDir($path){
-    if(!is_dir($path)){
-        mkdir($path);
+    if($path) {
+        if (!is_dir($path)) {
+            mkdir($path);
+        }
     }
-    //if(!is_dir($path)){
-    //    header("Location: system_check.php");
-    //    exit;
-    //}
 }
 
 /**
- * @param string $imagepath
- * @return string|void
+ * @param $imagepath
+ * @param $GALLERY_ROOT
+ * @param $THUMBS_ROOT
+ * @return mixed|void
  */
-function getOrCreateThumbnail($imagepath){
-    $thumbnailpath = str_replace(GALLERY_ROOT,THUMBS_ROOT,$imagepath);
+function getOrCreateThumbnail($imagepath, $GALLERY_ROOT, $THUMBS_ROOT){
+    $thumbnailpath = str_replace($GALLERY_ROOT,$THUMBS_ROOT,$imagepath);
     if(file_exists($thumbnailpath)){
         return $thumbnailpath;
     }
@@ -298,6 +306,36 @@ function getGitBranch()
 //        $exif_data .= " | f$efnumber";
 //    if (strlen($eiso) > 0)
 //        $exif_data .= " | ISO $eiso";
+//    return($exif_data);
+//}
+
+
+//function readEXIF($file) {
+//    $exif_data = "";
+//    $exif_idf0 = exif_read_data ($file,'IFD0' ,0 );
+//    $emodel = $exif_idf0['Model'];
+//
+//    $efocal = $exif_idf0['FocalLength'];
+//    list($x,$y) = explode('/', $efocal);
+//    $efocal = round($x/$y,0);
+//
+//    $exif_exif = exif_read_data ($file,'EXIF' ,0 );
+//    $eexposuretime = $exif_exif['ExposureTime'];
+//
+//    $efnumber = $exif_exif['FNumber'];
+//    list($x,$y) = explode('/', $efnumber);
+//    $efnumber = round($x/$y,0);
+//
+//    $eiso = $exif_exif['ISOSpeedRatings'];
+//
+//    $exif_date = exif_read_data ($file,'IFD0' ,0 );
+//    $edate = $exif_date['DateTime'];
+//    if (strlen($emodel) > 0 OR strlen($efocal) > 0 OR strlen($eexposuretime) > 0 OR strlen($efnumber) > 0 OR strlen($eiso) > 0) $exif_data .= "::";
+//    if (strlen($emodel) > 0) $exif_data .= "$emodel";
+//    if ($efocal > 0) $exif_data .= " | $efocal" . "mm";
+//    if (strlen($eexposuretime) > 0) $exif_data .= " | $eexposuretime" . "s";
+//    if ($efnumber > 0) $exif_data .= " | f$efnumber";
+//    if (strlen($eiso) > 0) $exif_data .= " | ISO $eiso";
 //    return($exif_data);
 //}
 

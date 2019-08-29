@@ -1,14 +1,15 @@
 
 /todo.txt
 /dump.php
+/config.php
 
 
-# Ignore main images directory
+# Ignore working images directory
 /photos
 /photos/*
 !/photos/.gitignore
 
-# Ignore main thumbnail directory
+# Ignore working thumbnail directory
 /_thumbs
 /_thumbs/*
 !/_thumbs/.gitignore
