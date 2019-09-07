@@ -1,18 +1,18 @@
 <?php
 
 // CONFIGURABLE OPTIONS ======================================================================================
-require('config_default.php');  // Default config
-include('config.php');          // Optional config
-require('functions.php');       // Required functions/classes
+require 'config_default.php';  // Default config
+include 'config.php';          // Optional config
+require 'functions.php';       // Required functions/classes
 //============================================================================================================
 error_reporting(E_ALL);
 
-ini_set("memory_limit", "-1");
+ini_set('memory_limit', '-1');
 
 checkCreateDir($GALLERY_ROOT);
 checkCreateDir($THUMBS_ROOT);
 
-$mtime = explode(" ", microtime());
+$mtime = explode(' ', microtime());
 $starttime = $mtime[1] + $mtime[0];
 
 //============================================================================================================
@@ -56,12 +56,12 @@ $files = scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
         <div class="container">
             <div class="row">
 <?php if ($dirs && count($dirs)) { ?>
-<?php foreach ($dirs as $dir) { //dumpr($dir); ?>
+<?php foreach ($dirs as $dir) { //dumpr($dir);?>
                 <div class="col-xs-12 col-sm-4 col-lg-3">
                     <a href="/<?= $dir['path'] ?>/">
                         <div class="dirimage greyscale" style="background-image:url('<?= $dir['thumbpath'] ?>');">
                             <h4><?= $dir['name'] ?></h4>
-                            <h5><?= $dir['numimages'] ?> image<?=$dir['numimages']==1?'':'s'?></h5>
+                            <h5><?= $dir['numimages'] ?> image<?=$dir['numimages'] == 1 ? '' : 's'?></h5>
                         </div>
                     </a>
                 </div>
@@ -81,7 +81,7 @@ $files = scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
             <div class="container">
                 <div class="scroll">
 <?php if ($dirs && count($dirs)) { ?>
-<?php foreach ($dirs as $dir) { //dump($dir); //dump($currentDir); ?>
+<?php foreach ($dirs as $dir) { //dump($dir); //dump($currentDir);?>
                     <div class="minidirectory">
                         <a href="/<?= $dir['path'] ?>/">
                             <div class="minidirimage greyscale <?= $currentDir == "/{$dir['path']}/" ? 'selected' : ''; ?>"
@@ -107,7 +107,7 @@ $files = scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
 <?php if ($files && count($files)) { ?>
     <div class="container">
 
-        <h2><?= $currentDirName ?> <span><?= count($files) ?> image<?=count($files)==1?'':'s'?></span></h2>
+        <h2><?= $currentDirName ?> <span><?= count($files) ?> image<?=count($files) == 1 ? '' : 's'?></span></h2>
 
 <?php /* Output an ordered list of hidden image links */ ?>
 <?php foreach ($files as $image) { ?>
@@ -124,7 +124,7 @@ $files = scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
 <?php
                 $cols = 4;
                 $col = 1;
-                $imageColumns = array();
+                $imageColumns = [];
                 $i = 1;
                 foreach ($files as $file) {
                     $imageColumns[$col][$i] = $file;
@@ -149,9 +149,9 @@ $files = scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
 
     <?php
     $mtime = microtime();
-    $mtime = explode(" ", $mtime);
+    $mtime = explode(' ', $mtime);
     $endtime = $mtime[1] + $mtime[0];
-    $totaltime = round(($endtime - $starttime),3);
+    $totaltime = round(($endtime - $starttime), 3);
     ?>
 
     <div id="footer">
@@ -163,11 +163,11 @@ $files = scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
 
     <div id="debug">
         <?php if ($DEBUG) {    //Debug stuff
-            dump($currentDir, '$currentDir');
-            dump($currentDirName, '$currentDirName');
-            dump($dirs, '$dirs');
-            dump($files, '$files');
-        } ?>
+        dump($currentDir, '$currentDir');
+        dump($currentDirName, '$currentDirName');
+        dump($dirs, '$dirs');
+        dump($files, '$files');
+    } ?>
     </div>
 
     <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>
