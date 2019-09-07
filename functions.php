@@ -1,59 +1,62 @@
 <?php
+
 //-----------------------
 // FUNCTIONS
 //-----------------------
 
-
 /**
  * @param $GALLERY_ROOT
  * @param $THUMBS_ROOT
+ *
  * @return array|bool
  */
 function scanDirectories($GALLERY_ROOT, $THUMBS_ROOT)
 {
     //Bomb out if GALLERY_ROOT not set
-    if(!$GALLERY_ROOT) return false;
+    if (!$GALLERY_ROOT) {
+        return false;
+    }
 
-    $dirs = array();
+    $dirs = [];
 
     // DIRECTORIES
     $files = scandir($GALLERY_ROOT);
     if ($files) {
-
         foreach ($files as $file) {
-
-            if ($file == '.') continue;
-            if ($file == '..') continue;
+            if ($file == '.') {
+                continue;
+            }
+            if ($file == '..') {
+                continue;
+            }
 
             // Rename files/folders and save
             if (!preg_match('/^[A-Za-z0-9_\-\.]+$/', $file)) {
                 $newfile = preg_replace('/[^A-Za-z0-9_\-\.]+/', '_', $file);
-                rename($GALLERY_ROOT . '/' . $file, $GALLERY_ROOT . '/' . $newfile);
+                rename($GALLERY_ROOT.'/'.$file, $GALLERY_ROOT.'/'.$newfile);
             }
 
-            if (is_dir($GALLERY_ROOT . '/' . $file)) {
-
-                checkCreateDir($THUMBS_ROOT . '/' . $file);
+            if (is_dir($GALLERY_ROOT.'/'.$file)) {
+                checkCreateDir($THUMBS_ROOT.'/'.$file);
 
                 unset($firstimage);
 
-                $image = getLastImage($GALLERY_ROOT . '/' . $file);
-                $thumbnail = getOrCreateThumbnail($GALLERY_ROOT . '/' . $file . '/' . $image, $GALLERY_ROOT, $THUMBS_ROOT);
+                $image = getLastImage($GALLERY_ROOT.'/'.$file);
+                $thumbnail = getOrCreateThumbnail($GALLERY_ROOT.'/'.$file.'/'.$image, $GALLERY_ROOT, $THUMBS_ROOT);
                 $directoryName = buildNameFromDirectory($file);
 
                 if ($thumbnail) {
-
-                    $dirs[] = array(
-                        "name" => $directoryName,
-                        "path" => $file,
-                        "thumbpath" => "/" . $THUMBS_ROOT . '/' . $file . "/" . $image,
-                        "numimages" => count(glob($GALLERY_ROOT . '/' . $file . '/*.*'))
-                    );
-
+                    $dirs[] = [
+                        'name'      => $directoryName,
+                        'path'      => $file,
+                        'thumbpath' => '/'.$THUMBS_ROOT.'/'.$file.'/'.$image,
+                        'numimages' => count(glob($GALLERY_ROOT.'/'.$file.'/*.*')),
+                    ];
                 }
             }
         }
     }
+
     return $dirs;
 }
 
@@ -62,24 +65,25 @@ function scanDirectories($GALLERY_ROOT, $THUMBS_ROOT)
  * @param $MAX_IMAGE_SIZE
  * @param $GALLERY_ROOT
  * @param $THUMBS_ROOT
+ *
  * @return array|bool
  */
 function scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $MAX_IMAGE_SIZE)
 {
     //Bomb out if GALLERY_ROOT not set
-    if (!$GALLERY_ROOT) return false;
+    if (!$GALLERY_ROOT) {
+        return false;
+    }
 
-    $files = array();
+    $files = [];
 
-    if($currentDir) {
-
-        $images = scandir($GALLERY_ROOT . $currentDir);
+    if ($currentDir) {
+        $images = scandir($GALLERY_ROOT.$currentDir);
         if ($images) {
 
             // Process Images
             foreach ($images as $k => $file) {
-
-                $fullpath = $GALLERY_ROOT . $currentDir . $file;
+                $fullpath = $GALLERY_ROOT.$currentDir.$file;
 
                 // Remove Non-Image files
                 if (!is_image($fullpath)) {
@@ -87,7 +91,7 @@ function scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
                 }
 
                 // Resize images if set
-                if($RESIZE_IMAGES && is_image($fullpath)) {
+                if ($RESIZE_IMAGES && is_image($fullpath)) {
                     $s = getimagesize($fullpath);
                     if ($s[0] > $MAX_IMAGE_SIZE) {  // Width > 2000px
                         resizeOriginalImage($fullpath);
@@ -97,27 +101,27 @@ function scanImages($currentDir, $GALLERY_ROOT, $THUMBS_ROOT, $RESIZE_IMAGES, $M
 
             // Build an array of Images, creating the thumbnail image if it doesn't exist
             foreach ($images as $k => $file) {
+                getOrCreateThumbnail($GALLERY_ROOT.$currentDir.$file, $GALLERY_ROOT, $THUMBS_ROOT);
 
-                getOrCreateThumbnail($GALLERY_ROOT . $currentDir . $file, $GALLERY_ROOT, $THUMBS_ROOT);
-
-                $files[] = array(
-                    "name" => $file,
-                    "order" => $k,
-                    "path" => '/' . $GALLERY_ROOT . $currentDir . $file,
-                    "thumb" => '/' . $THUMBS_ROOT . $currentDir . $file,
-                );
+                $files[] = [
+                    'name'  => $file,
+                    'order' => $k,
+                    'path'  => '/'.$GALLERY_ROOT.$currentDir.$file,
+                    'thumb' => '/'.$THUMBS_ROOT.$currentDir.$file,
+                ];
             }
         }
     }
+
     return $files;
 }
 
 /**
- *
  * @param string $path
  */
-function checkCreateDir($path){
-    if($path) {
+function checkCreateDir($path)
+{
+    if ($path) {
         if (!is_dir($path)) {
             mkdir($path);
         }
@@ -128,23 +132,27 @@ function checkCreateDir($path){
  * @param $imagepath
  * @param $GALLERY_ROOT
  * @param $THUMBS_ROOT
+ *
  * @return mixed|void
  */
-function getOrCreateThumbnail($imagepath, $GALLERY_ROOT, $THUMBS_ROOT){
-    $thumbnailpath = str_replace($GALLERY_ROOT,$THUMBS_ROOT,$imagepath);
-    if(file_exists($thumbnailpath)){
+function getOrCreateThumbnail($imagepath, $GALLERY_ROOT, $THUMBS_ROOT)
+{
+    $thumbnailpath = str_replace($GALLERY_ROOT, $THUMBS_ROOT, $imagepath);
+    if (file_exists($thumbnailpath)) {
         return $thumbnailpath;
     }
-    return createThumbnail($imagepath,$thumbnailpath);
+
+    return createThumbnail($imagepath, $thumbnailpath);
 }
 
 /**
  * @param string $imagepath
  * @param string $thumbnailpath
  */
-function createThumbnail($imagepath,$thumbnailpath){
+function createThumbnail($imagepath, $thumbnailpath)
+{
     //include_once 'ImageResize.php';
-    if(is_file($imagepath)){
+    if (is_file($imagepath)) {
         $resizeObj = new ImageResize($imagepath);
         $resizeObj->resizeImage(500, 500, 'auto'); //(options: exact, portrait, landscape, auto, crop)
         $resizeObj->saveImage($thumbnailpath);
@@ -154,8 +162,9 @@ function createThumbnail($imagepath,$thumbnailpath){
 /**
  * @param $originalImagePath
  */
-function resizeOriginalImage($originalImagePath){
-    if(is_file($originalImagePath)){
+function resizeOriginalImage($originalImagePath)
+{
+    if (is_file($originalImagePath)) {
         $resizeObj = new ImageResize($originalImagePath);
         $resizeObj->resizeImage(2000, 1000, 'auto'); //(options: exact, portrait, landscape, auto, crop)
         $resizeObj->saveImage($originalImagePath);
@@ -164,75 +173,91 @@ function resizeOriginalImage($originalImagePath){
 
 /**
  * @param string $dirname
- * @return boolean
+ *
+ * @return bool
  */
-function getLastImage($dirname) {
-    $exts = array("jpg", "png", "jpeg", "gif");
+function getLastImage($dirname)
+{
+    $exts = ['jpg', 'png', 'jpeg', 'gif'];
     $images = scandir($dirname);
     $lastImage = false;
-    foreach($images as $image){
-        if(is_file($dirname.'/'.$image)){
-            $ext = strtolower(pathinfo($dirname.'/'.$image,PATHINFO_EXTENSION));
-            if(in_array($ext,$exts)){
+    foreach ($images as $image) {
+        if (is_file($dirname.'/'.$image)) {
+            $ext = strtolower(pathinfo($dirname.'/'.$image, PATHINFO_EXTENSION));
+            if (in_array($ext, $exts)) {
                 $lastImage = $image;
             }
         }
     }
+
     return $lastImage;
 }
 
 /**
  * @param string $path
- * @return boolean
+ *
+ * @return bool
  */
-function is_image($path){
-    $exts = array("jpg", "png", "jpeg", "gif");
-    if(is_file($path)){
-        $ext = strtolower(pathinfo($path,PATHINFO_EXTENSION));
-        return in_array($ext,$exts);
+function is_image($path)
+{
+    $exts = ['jpg', 'png', 'jpeg', 'gif'];
+    if (is_file($path)) {
+        $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        return in_array($ext, $exts);
     }
+
     return false;
 }
 
 /**
- * @return boolean
+ * @return bool
  */
-function getCurrentDirectory(){
-    
-    $urlArray = explode('/',$_SERVER['REQUEST_URI']);
-    $urlArray = array_filter($urlArray);    
-    $urlArray = array_values($urlArray);    
+function getCurrentDirectory()
+{
+    $urlArray = explode('/', $_SERVER['REQUEST_URI']);
+    $urlArray = array_filter($urlArray);
+    $urlArray = array_values($urlArray);
     $segment = array_shift($urlArray);
-    if($segment){
+    if ($segment) {
         return "/$segment/";
     }
+
     return '/';
 }
 
 /**
  * @param type $slug
- * @return boolean
+ *
+ * @return bool
  */
-function getCurrentDirectoryName($slug){
+function getCurrentDirectoryName($slug)
+{
+    if ($slug == '/') {
+        return 'HOME';
+    }
 
-    if($slug=='/') return 'HOME';
-
-    $slug = str_replace('/','',$slug);
-    if($slug){
-        $slug = str_replace('_',' ',$slug);
+    $slug = str_replace('/', '', $slug);
+    if ($slug) {
+        $slug = str_replace('_', ' ', $slug);
         $slug = ucwords(strtolower($slug));
+
         return $slug;
     }
+
     return false;
 }
 
 /**
  * @param $file
+ *
  * @return mixed|string
  */
-function buildNameFromDirectory($file){
-    $name = str_replace(array('_','-'),' ',$file);
+function buildNameFromDirectory($file)
+{
+    $name = str_replace(['_', '-'], ' ', $file);
     $name = ucwords($name);
+
     return $name;
 }
 
@@ -255,9 +280,6 @@ function buildNameFromDirectory($file){
 //            $target = imagerotate($target, $degrees, 0);
 //    }
 //}
-
-
-
 
 //function readEXIF($file) {
 //    $exif_data = "";
@@ -294,7 +316,6 @@ function buildNameFromDirectory($file){
 //    return($exif_data);
 //}
 
-
 //function readEXIF($file) {
 //    $exif_data = "";
 //    $exif_idf0 = exif_read_data ($file,'IFD0' ,0 );
@@ -330,7 +351,6 @@ function buildNameFromDirectory($file){
 //        $messages = "At least one file or folder has wrong permissions. Learn how to <a href='http://minigal.dk/faq-reader/items/how-do-i-change-file-permissions-chmod.html' target='_blank'>set file permissions</a>";
 //}
 
-
 //-----------------------
 // PHP ENVIRONMENT CHECK
 //-----------------------
@@ -338,7 +358,6 @@ function buildNameFromDirectory($file){
 //    $display_exif = 0;
 //    $messages = "Error: PHP EXIF is not available. Set &#36;display_exif = 0; in config.php to remove this message";
 //}
-
 
 //function is_directory($filepath) {
 //    // $filepath must be the entire system path to the file
@@ -360,8 +379,6 @@ function buildNameFromDirectory($file){
 //        return $name;
 //}
 
-
-
 //======================================================================================================================
 //======================================================================================================================
 //======================================================================================================================
@@ -372,14 +389,13 @@ function buildNameFromDirectory($file){
 
 class ImageResize
 {
-
     // *** Class variables
     private $image;
     private $width;
     private $height;
     private $imageResized;
 
-    function __construct($fileName)
+    public function __construct($fileName)
     {
         // *** Open up the file
         $this->image = $this->openImage($fileName);
@@ -387,10 +403,9 @@ class ImageResize
         // *** Get width and height
         $this->width = imagesx($this->image);
         $this->height = imagesy($this->image);
-
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 
     private function openImage($file)
     {
@@ -412,12 +427,13 @@ class ImageResize
                 $img = false;
                 break;
         }
+
         return $img;
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 
-    public function resizeImage($newWidth, $newHeight, $option = "auto")
+    public function resizeImage($newWidth, $newHeight, $option = 'auto')
     {
 
         // *** Get optimal width and height - based on $option
@@ -444,11 +460,10 @@ class ImageResize
         }
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 
     private function getDimensions($newWidth, $newHeight, $option)
     {
-
         switch ($option) {
             case 'exact':
                 $optimalWidth = $newWidth;
@@ -473,15 +488,17 @@ class ImageResize
                 $optimalHeight = $optionArray['optimalHeight'];
                 break;
         }
-        return array('optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight);
+
+        return ['optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight];
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 
     private function getSizeByFixedHeight($newHeight)
     {
         $ratio = $this->width / $this->height;
         $newWidth = $newHeight * $ratio;
+
         return $newWidth;
     }
 
@@ -489,6 +506,7 @@ class ImageResize
     {
         $ratio = $this->height / $this->width;
         $newHeight = $newWidth * $ratio;
+
         return $newHeight;
     }
 
@@ -507,7 +525,7 @@ class ImageResize
             if ($newHeight < $newWidth) {
                 $optimalWidth = $newWidth;
                 $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-            } else if ($newHeight > $newWidth) {
+            } elseif ($newHeight > $newWidth) {
                 $optimalWidth = $this->getSizeByFixedHeight($newHeight);
                 $optimalHeight = $newHeight;
             } else {
@@ -517,14 +535,13 @@ class ImageResize
             }
         }
 
-        return array('optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight);
+        return ['optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight];
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 
     private function getOptimalCrop($newWidth, $newHeight)
     {
-
         $heightRatio = $this->height / $newHeight;
         $widthRatio = $this->width / $newWidth;
 
@@ -537,10 +554,10 @@ class ImageResize
         $optimalHeight = $this->height / $optimalRatio;
         $optimalWidth = $this->width / $optimalRatio;
 
-        return array('optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight);
+        return ['optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight];
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 
     private function crop($optimalWidth, $optimalHeight, $newWidth, $newHeight)
     {
@@ -555,9 +572,9 @@ class ImageResize
         imagecopyresampled($this->imageResized, $crop, 0, 0, $cropStartX, $cropStartY, $newWidth, $newHeight, $newWidth, $newHeight);
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 
-    public function saveImage($savePath, $imageQuality = "90")
+    public function saveImage($savePath, $imageQuality = '90')
     {
 
         // *** Get extension
@@ -597,21 +614,19 @@ class ImageResize
         imagedestroy($this->imageResized);
     }
 
-    ## --------------------------------------------------------
+    //# --------------------------------------------------------
 }
 
-
 /**
- * Dumpr - Dump any resource with syntax highlighting, indenting and variable type information to the screen in a very intuitive format
+ * Dumpr - Dump any resource with syntax highlighting, indenting and variable type information to the screen in a very intuitive format.
  *
  * Licensed under the terms of the GNU Lesser General Public License:
  *      http://www.opensource.org/licenses/lgpl-license.php
  *
- * @package plugins
- * @subpackage avelsieve
  * @author    Jari Berg Jensen &lt;jari@razormotion.com&gt;
  *           http://www.razormotion.com/software/dumpr/
  * @license   LGPL
+ *
  * @version  1.7
  * Modified  2005/03/31
  *
@@ -637,14 +652,15 @@ class ImageResize
  */
 
 /**
- * Dump any resource with syntax highlighting, indenting and variable type information
+ * Dump any resource with syntax highlighting, indenting and variable type information.
+ *
  * @param mixed $data
- * @param boolean $return
+ * @param bool  $return
+ *
  * @return string
  */
 function dump($data, $label = '', $return = false)
 {
-
     $debug = debug_backtrace();
     $callingFile = $debug[0]['file'];
     $callingFileLine = $debug[0]['line'];
@@ -657,9 +673,9 @@ function dump($data, $label = '', $return = false)
     $c = preg_replace("/\r\n|\r/", "\n", $c);
     $c = str_replace("]=>\n", '] = ', $c);
     $c = preg_replace('/= {2,}/', '= ', $c);
-    $c = preg_replace("/\[\"(.*?)\"\] = /i", "[$1] = ", $c);
-    $c = preg_replace('/  /', "    ", $c);
-    $c = preg_replace("/\"\"(.*?)\"/i", "\"$1\"", $c);
+    $c = preg_replace("/\[\"(.*?)\"\] = /i", '[$1] = ', $c);
+    $c = preg_replace('/  /', '    ', $c);
+    $c = preg_replace('/""(.*?)"/i', '"$1"', $c);
 
     //$c = htmlspecialchars($c, ENT_NOQUOTES);
 
@@ -668,27 +684,27 @@ function dump($data, $label = '', $return = false)
     //$c = preg_replace("/(int|float)\(([0-9\.]+)\)/ie", "'$1('.strlen('$2').') <span class=\"number\">$2</span>'", $c);
     // @CM
     //$c = preg_replace("/(int|float)\(([0-9\.]+)\)/i", "$1(".strlen('$2').") <span class=\"number\">$2</span>", $c);
-    $c = preg_replace("/(int|float)\(([0-9\.]+)\)/i", "$1() <span class=\"number\">$2</span>", $c);
+    $c = preg_replace("/(int|float)\(([0-9\.]+)\)/i", '$1() <span class="number">$2</span>', $c);
 
     // Syntax Highlighting of Strings. This seems cryptic, but it will also allow non-terminated strings to get parsed.
-    $c = preg_replace("/(\[[\w ]+\] = string\([0-9]+\) )\"(.*?)/sim", "$1<span class=\"string\">\"", $c);
-    $c = preg_replace("/(\"\n{1,})( {0,}\})/sim", "$1</span>$2", $c);
-    $c = preg_replace("/(\"\n{1,})( {0,}\[)/sim", "$1</span>$2", $c);
+    $c = preg_replace("/(\[[\w ]+\] = string\([0-9]+\) )\"(.*?)/sim", '$1<span class="string">"', $c);
+    $c = preg_replace("/(\"\n{1,})( {0,}\})/sim", '$1</span>$2', $c);
+    $c = preg_replace("/(\"\n{1,})( {0,}\[)/sim", '$1</span>$2', $c);
     $c = preg_replace("/(string\([0-9]+\) )\"(.*?)\"\n/sim", "$1<span class=\"string\">\"$2\"</span>\n", $c);
 
-    $regex = array(
+    $regex = [
         // Numberrs
-        'numbers' => array('/(^|] = )(array|float|int|string|resource|object\(.*\)|\&amp;object\(.*\))\(([0-9\.]+)\)/i', '$1$2(<span class="number">$3</span>)'),
+        'numbers' => ['/(^|] = )(array|float|int|string|resource|object\(.*\)|\&amp;object\(.*\))\(([0-9\.]+)\)/i', '$1$2(<span class="number">$3</span>)'],
         // Keywords
-        'null' => array('/(^|] = )(null)/i', '$1<span class="keyword">$2</span>'),
-        'bool' => array('/(bool)\((true|false)\)/i', '$1(<span class="keyword">$2</span>)'),
+        'null' => ['/(^|] = )(null)/i', '$1<span class="keyword">$2</span>'],
+        'bool' => ['/(bool)\((true|false)\)/i', '$1(<span class="keyword">$2</span>)'],
         // Types
-        'types' => array('/(of type )\((.*)\)/i', '$1(<span class="type">$2</span>)'),
+        'types' => ['/(of type )\((.*)\)/i', '$1(<span class="type">$2</span>)'],
         // Objects
-        'object' => array('/(object|\&amp;object)\(([\w]+)\)/i', '$1(<span class="object">$2</span>)'),
+        'object' => ['/(object|\&amp;object)\(([\w]+)\)/i', '$1(<span class="object">$2</span>)'],
         // Function
-        'function' => array('/(^|] = )(array|string|int|float|bool|resource|object|\&amp;object)\(/i', '$1<span class="function">$2</span>('),
-    );
+        'function' => ['/(^|] = )(array|string|int|float|bool|resource|object|\&amp;object)\(/i', '$1<span class="function">$2</span>('],
+    ];
 
     foreach ($regex as $x) {
         $c = preg_replace($x[0], $x[1], $c);
@@ -730,8 +746,8 @@ function dump($data, $label = '', $return = false)
     .dumpr span.type {color: #0072c4;}
     ';
 
-    $style = preg_replace("/ {2,}/", "", $style);
-    $style = preg_replace("/\t|\r\n|\r|\n/", "", $style);
+    $style = preg_replace('/ {2,}/', '', $style);
+    $style = preg_replace("/\t|\r\n|\r|\n/", '', $style);
     $style = preg_replace("/\/\*.*?\*\//i", '', $style);
     $style = str_replace('}', '} ', $style);
     $style = str_replace(' {', '{', $style);
