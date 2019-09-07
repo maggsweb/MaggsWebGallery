@@ -1,9 +1,4 @@
 
-/todo.txt
-/dump.php
-/config.php
-
-
 # Ignore working images directory
 /photos
 /photos/*
@@ -16,3 +11,8 @@
 
 # PHPStorm
 /.idea
+
+# Dev files
+/todo.txt
+/dump.php
+/config.php
