@@ -174,7 +174,7 @@ function resizeOriginalImage($originalImagePath)
 /**
  * @param string $dirname
  *
- * @return boolean
+ * @return bool
  */
 function getLastImage($dirname)
 {
@@ -196,7 +196,7 @@ function getLastImage($dirname)
 /**
  * @param string $path
  *
- * @return boolean
+ * @return bool
  */
 function is_image($path)
 {
@@ -211,7 +211,7 @@ function is_image($path)
 }
 
 /**
- * @return boolean
+ * @return bool
  */
 function getCurrentDirectory()
 {
@@ -229,7 +229,7 @@ function getCurrentDirectory()
 /**
  * @param type $slug
  *
- * @return boolean
+ * @return bool
  */
 function getCurrentDirectoryName($slug)
 {
