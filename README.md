@@ -1,2 +1,2 @@
-# MaggsWebGallery
+# MaggsWeb Gallery
 Simple, automated, photo gallery
