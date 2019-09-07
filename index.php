@@ -1,16 +1,10 @@
 <?php
 
 // CONFIGURABLE OPTIONS ======================================================================================
-require("config_default.php");
-include("config.php");
-
-// Include dumpr.php if DEBUG is On and file exists
-if (($DEBUG) && file_exists('dump.php')) include 'dump.php';
-
-include 'functions.php';
-
+require('config_default.php');  // Default config
+include('config.php');          // Optional config
+require('functions.php');       // Required functions/classes
 //============================================================================================================
-
 error_reporting(E_ALL);
 
 ini_set("memory_limit", "-1");

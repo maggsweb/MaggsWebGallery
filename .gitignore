@@ -1,11 +1,9 @@
 
-# Ignore working images directory
-/photos
+# Ignore default images directory
 /photos/*
 !/photos/.gitignore
 
-# Ignore working thumbnail directory
-/_thumbs
+# Ignore default thumbnail directory
 /_thumbs/*
 !/_thumbs/.gitignore
 
@@ -14,5 +12,4 @@
 
 # Dev files
 /todo.txt
-/dump.php
 /config.php
